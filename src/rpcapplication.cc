@@ -18,7 +18,7 @@ void RpcApplication::Init(int argc, char** argv) {
     }
     int ch = 0;
     std::string config_file;
-    while (ch = getopt(argc, argv, "i:") != -1) {
+    while ((ch = getopt(argc, argv, "i:")) != -1) {
         switch(ch) {
         case 'i':
             config_file = optarg;
