@@ -3,6 +3,8 @@
 #include <unistd.h>
 #include "rpcapplication.h"
 
+RpcConfig RpcApplication::config_;
+
 // 用户输入配置文件时显示的帮助信息
 void ShowArgInfo() {
     std::cout << "format: command -i <configfile>" << std::endl;
@@ -29,6 +31,12 @@ void RpcApplication::Init(int argc, char** argv) {
             break;
         }
     }
+    config_.LoadConfigFile(config_file);
+
+    std::cout << config_.QueryConfigInfo("rpcserverip") << std::endl;
+    std::cout << config_.QueryConfigInfo("rpcserverport") << std::endl;
+    std::cout << config_.QueryConfigInfo("zookeeperip") << std::endl;
+    std::cout << config_.QueryConfigInfo("zookeeperport") << std::endl;
 }
 
 RpcApplication& RpcApplication::GetInstance() {
