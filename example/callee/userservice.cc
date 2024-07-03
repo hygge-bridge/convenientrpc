@@ -1,9 +1,11 @@
 #include <iostream>
 #include <string>
 #include "user.pb.h"
+#include "rpcapplication.h"
+#include "rpcprovider.h"
 
 // 用户服务类，不实现具体业务，只是作为简单示例
-class UserService {
+class UserService : public hygge::UserServiceRpc {
 public:
     // 登录服务
     bool Login(std::string& name, std::string& pwd) {
@@ -11,7 +13,7 @@ public:
         return true;
     }
     
-    // 重写Login方法，发布为rpc服务
+    // 重写Login方法
     void Login(::google::protobuf::RpcController* controller,
                        const ::hygge::LoginRequest* request,
                        ::hygge::LoginResponse* response,
@@ -29,6 +31,11 @@ public:
     }
 };
 
-int main() {
-
+int main(int argc, char** argv) {
+    // 发布rpc的使用示例
+    RpcApplication::Init(argc, argv);
+    RpcProvider provider;
+    provider.NotifyService(new UserService());
+    provider.Run();
+    return 0;
 }
