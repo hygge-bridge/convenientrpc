@@ -32,11 +32,6 @@ void RpcApplication::Init(int argc, char** argv) {
         }
     }
     config_.LoadConfigFile(config_file);
-
-    std::cout << config_.QueryConfigInfo("rpcserverip") << std::endl;
-    std::cout << config_.QueryConfigInfo("rpcserverport") << std::endl;
-    std::cout << config_.QueryConfigInfo("zookeeperip") << std::endl;
-    std::cout << config_.QueryConfigInfo("zookeeperport") << std::endl;
 }
 
 RpcApplication& RpcApplication::GetInstance() {

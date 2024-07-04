@@ -8,6 +8,7 @@ class RpcApplication {
 public:
     static void Init(int argc, char** argv);
     static RpcApplication& GetInstance();
+    static RpcConfig& GetConfig() { return config_; }
 private:
     RpcApplication() {}
     RpcApplication(const RpcApplication&) = delete;
