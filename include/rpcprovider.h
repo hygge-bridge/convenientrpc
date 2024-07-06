@@ -27,6 +27,9 @@ private:
     void OnMessage(const muduo::net::TcpConnectionPtr& conn, 
                     muduo::net::Buffer* buffer, muduo::Timestamp time);
 
+    // 用于服务的回调，返回rpc响应
+    void SendRpcResponse(const muduo::net::TcpConnectionPtr& conn, google::protobuf::Message* message);
+
     // 服务的详细信息
     struct ServiceInfo {
         // service指针，用于后续底层调用上层的服务
