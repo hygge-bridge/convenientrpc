@@ -21,7 +21,7 @@ public:
         std::string name = request->name();
         std::string pwd = request->pwd();
         bool login_res = Login(name, pwd);  // 模拟做一些业务
-
+        // 正确执行
         hygge::ResultCode* res = response->mutable_res();
         res->set_errcode(0);
         res->set_errmsg("");

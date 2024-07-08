@@ -1,6 +1,7 @@
 #include "rpcprovider.h"
 #include "rpcheader.pb.h"
 #include <thread>
+#include <functional>
 
 // 根据cpu核心数量来设置线程个数
 static const int kThreadNum = std::thread::hardware_concurrency();
@@ -28,10 +29,16 @@ void RpcProvider::NotifyService(google::protobuf::Service* service) {
 }
 
 void RpcProvider::Run() {
+    // 创建tcp server对象
     std::string ip = RpcApplication::GetInstance().GetConfig().QueryConfigInfo("rpcserverip");
     uint16_t port = atoi(RpcApplication::GetInstance().GetConfig().QueryConfigInfo("rpcserverport").c_str());
     muduo::net::InetAddress address(ip, port);
     muduo::net::TcpServer tcp_server(&event_loop_, address, "rpcprovider");
+    // 绑定回调
+    tcp_server.setConnectionCallback(std::bind(&RpcProvider::OnConnection, this, std::placeholders::_1));
+    tcp_server.setMessageCallback(std::bind(&RpcProvider::OnMessage, this, std::placeholders::_1, 
+                                 std::placeholders::_2, std::placeholders::_3));
+
     tcp_server.setThreadNum(kThreadNum);  
     std::cout << "rpcprovider start: ip=" << ip << " port=" << port << std::endl;
     tcp_server.start();
@@ -51,10 +58,10 @@ void RpcProvider::OnConnection(const muduo::net::TcpConnectionPtr& conn) {
 void RpcProvider::OnMessage(const muduo::net::TcpConnectionPtr& conn, 
                 muduo::net::Buffer* buffer, muduo::Timestamp time) {
     std::string buf = buffer->retrieveAllAsString();
-    uint32_t header_size;
+    uint32_t header_size = 0;
     // 将int强转为char*是为了将大小直接存储到header_size的内存中
     // 此处无法采用字符串转为整数，比如10000转成整数会占用5个字节
-    buf.copy((char*)header_size, 4, 0);  
+    buf.copy((char*)&header_size, 4, 0);  
     std::string header_str = buf.substr(4, header_size);
     std::string service_name;
     std::string method_name;
@@ -66,7 +73,7 @@ void RpcProvider::OnMessage(const muduo::net::TcpConnectionPtr& conn,
         args_size = header.args_size();
     }
     else {
-        std::cout << "faild to parse from " << header_str << std::endl;
+        std::cout << "failed to parse from " << header_str << std::endl;
         return;
     }
     std::string args_str = buf.substr(4 + header_size, args_size);

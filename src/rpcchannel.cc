@@ -42,7 +42,7 @@ void RpcChannel::CallMethod(const ::google::protobuf::MethodDescriptor* method,
     // 组装数据
     std::string send_request_str;
     // 直接将二进制内存数据插入到发送字符串中
-    send_request_str.insert(0, std::string((char*)&rpcheader_size), 0, 4);
+    send_request_str.insert(0, std::string((char*)&rpcheader_size, 4));
     send_request_str += rpcheader_str;
     send_request_str += args_str;
 
@@ -76,8 +76,7 @@ void RpcChannel::CallMethod(const ::google::protobuf::MethodDescriptor* method,
         std::cout << "Failed to connect to server" << std::endl;
         exit(EXIT_FAILURE);
     }
-    char send_buf[kBufSize];
-    if (send(*clientfd_ptr, send_buf, sizeof(send_buf), 0) == -1) {
+    if (send(*clientfd_ptr, send_request_str.c_str(), send_request_str.size(), 0) == -1) {
         std::cout << "Failed to send data to server" << std::endl;
         return;
     }
