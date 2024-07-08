@@ -3,8 +3,8 @@ package hygge;
 option cc_generic_services = true;
 
 message ResultCode {
-    int32 errcode = 1;
-    bytes errmsg = 2;
+    int32 errcode = 1;  // 错误码
+    bytes errmsg = 2;   // 错误信息
 }
 
 message LoginRequest {
@@ -14,7 +14,7 @@ message LoginRequest {
 
 message LoginResponse {
     ResultCode res = 1;
-    bool success = 2;
+    bool success = 2;  // 成功返回1，失败返回0
 }
 
 service UserServiceRpc {
