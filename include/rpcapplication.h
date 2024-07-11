@@ -2,6 +2,10 @@
 #define RPC_APPLICATION_H
 
 #include "rpcconfig.h"
+#include "rpcchannel.h"
+#include "rpcconfig.h"
+#include "rpcprovider.h"
+#include "rpccontroller.h"
 
 // rpc应用程序类，通过该类来创建rpc框架服务
 class RpcApplication {

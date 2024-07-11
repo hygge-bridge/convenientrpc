@@ -10,14 +10,19 @@ int main(int argc, char** argv) {
     request.set_name("hygge");
     request.set_pwd("123");
     hygge::LoginResponse response;
-    user_stub.Login(nullptr, &request, &response, nullptr);
-
-    if (response.success() == 0) {
-        std::cout << "rpc method: login() error! err code: " << response.res().errcode() << 
-                     " err msg" << response.res().errmsg() << std::endl;
+    RpcController controller;
+    user_stub.Login(&controller, &request, &response, nullptr);
+    if (controller.Failed()) {
+        std::cout << controller.ErrorText() << std::endl;
     }
     else {
-        std::cout << "rpc method: login() success! success: " << response.success() << std::endl;
+        if (response.success() == 0) {
+            std::cout << "rpc method: login() error! err code: " << response.res().errcode() << 
+                            " err msg" << response.res().errmsg() << std::endl;
+        }
+        else {
+            std::cout << "rpc method: login() success! success: " << response.success() << std::endl;
+        }
     }
     return 0;
 }

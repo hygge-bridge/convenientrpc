@@ -24,7 +24,8 @@ void RpcChannel::CallMethod(const ::google::protobuf::MethodDescriptor* method,
     // 序列化参数数据
     std::string args_str;
     if (!request->SerializeToString(&args_str)) {
-        std::cout << "Failed to serialize args to string" << std::endl;
+        //std::cout << "Failed to serialize args to string" << std::endl;
+        controller->SetFailed("Failed to serialize args to string");
         return;
     }
     uint32_t args_size = args_str.size();
@@ -35,7 +36,8 @@ void RpcChannel::CallMethod(const ::google::protobuf::MethodDescriptor* method,
     rpcheader.set_args_size(args_size);
     std::string rpcheader_str;
     if (!rpcheader.SerializeToString(&rpcheader_str)) {
-        std::cout << "Failed to serialize rpcheader to string!" << std::endl;
+        //std::cout << "Failed to serialize rpcheader to string!" << std::endl;
+        controller->SetFailed("Failed to serialize rpcheader to string!");
         return;
     }
     uint32_t rpcheader_size = rpcheader_str.size();
@@ -62,8 +64,10 @@ void RpcChannel::CallMethod(const ::google::protobuf::MethodDescriptor* method,
         [](int* clientfd) { close(*clientfd); }
     );  // 自定义删除器用于关闭套接字
     if (*clientfd_ptr == -1) {
-        std::cout << "Failed to create socket!" << std::endl;
-        exit(EXIT_FAILURE);
+        //std::cout << "Failed to create socket!" << std::endl;
+        //exit(EXIT_FAILURE);
+        controller->SetFailed("Failed to create socket!");
+        return;
     }
     std::string ip = RpcApplication::GetInstance().GetConfig().QueryConfigInfo("rpcserverip");
     uint16_t port = atoi(RpcApplication::GetInstance().GetConfig().QueryConfigInfo("rpcserverport").c_str());
@@ -73,22 +77,26 @@ void RpcChannel::CallMethod(const ::google::protobuf::MethodDescriptor* method,
     server_addr.sin_port = htons(port);
     server_addr.sin_addr.s_addr = inet_addr(ip.c_str());
     if (connect(*clientfd_ptr, (struct sockaddr*)&server_addr, sizeof(server_addr)) == -1) {
-        std::cout << "Failed to connect to server" << std::endl;
-        exit(EXIT_FAILURE);
+        // std::cout << "Failed to connect to server" << std::endl;
+        // exit(EXIT_FAILURE);
+        controller->SetFailed("Failed to connect to server");
+        return;
     }
     if (send(*clientfd_ptr, send_request_str.c_str(), send_request_str.size(), 0) == -1) {
-        std::cout << "Failed to send data to server" << std::endl;
+        // std::cout << "Failed to send data to server" << std::endl;
+        controller->SetFailed("Failed to send data to server");
         return;
     }
     char recv_buf[kBufSize];
     int recv_size = 0;
     if ((recv_size = recv(*clientfd_ptr, recv_buf, sizeof(recv_buf), 0)) == -1) {
-        std::cout << "Failed to receive data from server" << std::endl;
+        // std::cout << "Failed to receive data from server" << std::endl;
+        controller->SetFailed("Failed to receive data from server");
         return;
     }
     if (!response->ParseFromArray(recv_buf, recv_size)) {
-        std::cout << "Failed to Parse recv_buf" << std::endl;
+        // std::cout << "Failed to Parse recv_buf" << std::endl;
+        controller->SetFailed("Failed to Parse recv_buf");
         return;
     }
-    std::cout << "Rpc Call done true" << std::endl;
 }
