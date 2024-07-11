@@ -13,7 +13,8 @@ int main(int argc, char** argv) {
     RpcController controller;
     user_stub.Login(&controller, &request, &response, nullptr);
     if (controller.Failed()) {
-        std::cout << controller.ErrorText() << std::endl;
+        // std::cout << controller.ErrorText() << std::endl;
+        LOG_ERROR("%s", controller.ErrorText().c_str());
     }
     else {
         if (response.success() == 0) {

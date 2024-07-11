@@ -1,6 +1,7 @@
 #include <iostream>
 #include <fstream>
 #include "rpcconfig.h"
+#include "rpcapplication.h"
 
 void RpcConfig::Strip(std::string& str) {
     int slow = 0;
@@ -15,7 +16,8 @@ void RpcConfig::Strip(std::string& str) {
 void RpcConfig::LoadConfigFile(const std::string& config_file) {
     std::fstream file(config_file);
     if (!file.is_open()) {
-        std::cout << "The file:" << config_file <<  " cannot be opened. " << std::endl;
+        // std::cout << "The file:" << config_file <<  " cannot be opened. " << std::endl;
+        LOG_ERROR("The file: %s cannot be opened.", config_file.c_str());
         exit(EXIT_FAILURE);
     }
     std::string line_buf;
