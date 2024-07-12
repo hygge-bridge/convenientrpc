@@ -8,6 +8,7 @@
 #include "rpccontroller.h"
 #include "logger.h"
 #include "messagequeue.h"
+#include "zookeeperutil.h"
 
 // rpc应用程序类，通过该类来创建rpc框架服务
 class RpcApplication {

@@ -7,6 +7,8 @@
 static const int kThreadNum = std::thread::hardware_concurrency();
 // rpc数据头大小被存放在数据的前四个字节
 static const int kHeaderSize = 4;
+// zk的路径缓冲区大小
+static const int kMethodBufSize = 128;
 
 // 发布服务需要将对应服务和其方法的 名字和描述信息转入映射表中，
 // 这样后续rpc框架才可以根据该映射表找到对应的方法
@@ -41,7 +43,24 @@ void RpcProvider::Run() {
     tcp_server.setMessageCallback(std::bind(&RpcProvider::OnMessage, this, std::placeholders::_1, 
                                  std::placeholders::_2, std::placeholders::_3));
 
-    tcp_server.setThreadNum(kThreadNum);  
+    tcp_server.setThreadNum(kThreadNum);
+
+    // 将rpc节点注册到zookeeper
+    ZkClient zk_cli;
+    zk_cli.Start();
+    // 服务名应注册为永久节点，而方法名应为临时节点
+    for (auto& serv_it : service_map_) {
+        std::string service_path = "/" + serv_it.first;
+        zk_cli.Create(service_path.c_str(), nullptr, 0);
+        for (auto& meth_it : serv_it.second.method_map) {
+            std::string method_path = service_path + "/" + meth_it.first;
+            char method_path_buf[kMethodBufSize];
+            sprintf(method_path_buf, "%s:%d", ip.c_str(), port);
+            zk_cli.Create(method_path.c_str(), method_path_buf, strlen(method_path_buf), ZOO_EPHEMERAL);
+        }
+    }
+
+
     std::cout << "rpcprovider start: ip=" << ip << " port=" << port << std::endl;
     tcp_server.start();
     event_loop_.loop();

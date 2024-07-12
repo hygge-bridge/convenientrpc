@@ -32,9 +32,6 @@ public:
 };
 
 int main(int argc, char** argv) {
-    LOG_NORMAL("normal log");
-    LOG_ERROR("%s-%s", "test", "no");
-
     // 发布rpc的使用示例
     RpcApplication::Init(argc, argv);
     RpcProvider provider;

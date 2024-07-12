@@ -69,8 +69,24 @@ void RpcChannel::CallMethod(const ::google::protobuf::MethodDescriptor* method,
         controller->SetFailed("Failed to create socket!");
         return;
     }
-    std::string ip = RpcApplication::GetInstance().GetConfig().QueryConfigInfo("rpcserverip");
-    uint16_t port = atoi(RpcApplication::GetInstance().GetConfig().QueryConfigInfo("rpcserverport").c_str());
+    // std::string ip = RpcApplication::GetInstance().GetConfig().QueryConfigInfo("rpcserverip");
+    // uint16_t port = atoi(RpcApplication::GetInstance().GetConfig().QueryConfigInfo("rpcserverport").c_str());
+    // 通过zk查询ip和port
+    ZkClient zk_cli;
+    zk_cli.Start();
+    std::string method_path = "/" + service_name + "/" + method_name;
+    std::string host = zk_cli.GetData(method_path.c_str());
+    if (host.empty()) {
+        controller->SetFailed(method_path + "is not exist!");
+        return;
+    }
+    int pos = host.find(":");
+    if (pos == -1) {
+        controller->SetFailed(method_path + ": address is invalid!");
+        return;
+    }
+    std::string ip = host.substr(0, pos);
+    uint16_t port = atoi(host.substr(pos + 1, host.size() - pos).c_str());
 
     struct sockaddr_in server_addr;
     server_addr.sin_family = AF_INET;
